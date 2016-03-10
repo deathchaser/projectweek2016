@@ -4,7 +4,7 @@ require_once("tfidf.php");
 
 $requestUrl = 'https://ba4f9524-07de-4ac5-82e3-58af008724e2:0gssliiq3f@cdeservice.mybluemix.net/api/v1/messages/search';
 $search = "ucll";
-$size = 100;
+$size = 20;
 $lang = "en";
 $from = 0;
 
@@ -68,10 +68,32 @@ function countUses($word, $defaultLines) {
  * @return json as string       watson result
  */
 function useWatson($text) {
+	/*rtrim($text, '&');
 	$host = "https://c05b24fd-cb71-48ea-bfeb-b81ff5bffcff:pHZwHBOSBOIR@gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text=" . urlencode($text);
+	//$host = "https://c05b24fd-cb71-48ea-bfeb-b81ff5bffcff:pHZwHBOSBOIR@gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11&text=ditistext";
+	
 	$contentJson = file_get_contents($host);
-	return $contentJson;
+	return $contentJson;*/
+	rtrim($text, '&');
+	$url = 'https://c05b24fd-cb71-48ea-bfeb-b81ff5bffcff:pHZwHBOSBOIR@gateway.watsonplatform.net/tone-analyzer-beta/api/v3/tone?version=2016-02-11';
+	$data = array('text' => urlencode($text));
+
+	// use key 'http' even if you send the request to https://...
+	$options = array(
+	    'http' => array(
+	        'header'  => "Content-type: text/plain",
+	        'method'  => 'POST',
+	        'content' => http_build_query($data),
+	    ),
+	);
+	$context  = stream_context_create($options);
+	$result = file_get_contents($url, false, $context);
+	if ($result === FALSE) { echo "watson doe moeilijk"; return false;}
+
+	return $result;
 }
+
+
 
 $lines = file('lines.txt');
 for($i = 0;$i < count($lines); $i++) {
@@ -111,21 +133,22 @@ $resultJson .= ']';
 */
 
 $watsonDataString = useWatson($twitterContent);
+if($watsonDataString == false) {
+	
+}else{
+	$watsonData = json_decode($watsonDataString);
 
-$watsonData = json_decode($watsonDataString);
+	$tones = $watsonData->document_tone->tone_categories[0]->tones;
 
-$tones = $watsonData->document_tone->tone_categories[0]->tones;
+	$resultJson .= ',"tones":[';
 
-$resultJson .= ',"tones":[';
+	foreach($tones as $tone) {
+		$resultJson .= '{"tone":"' . $tone->tone_id . '", "score":"' . $tone->score . '"},'; 
+	}
+	$resultJson = substr($resultJson, 0, -1);
 
-foreach($tones as $tone) {
-	$resultJson .= '{"tone":"' . $tone->tone_id . '", "score":"' . $tone->score . '"},'; 
+	$resultJson .= ']';
 }
-$resultJson = substr($resultJson, 0, -1);
-
-$resultJson .= ']';
-
-
 
 $resultJson .= '}';
 
