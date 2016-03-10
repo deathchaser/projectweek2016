@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<head>
+	<title>Diabetes | Dashboard</title>
+	<!-- metas ... -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+	
+	
+	<style>
+	
+	@keyframes nomAnim {
+	from{background:#09C;height:56px;margin-top:-12px;}
+	70%{background:#eee;height:30px;margin-top:0px;}
+	to{background:#eee;height:30px;margin-top:0px;}
+	}
+	
+	.chargement div {
+	width: 10px;
+	height: 25px;
+	background: white;
+	display : inline-block;
+	}
+	
+	.chargement1{     animation: nomAnim 0.7s infinite linear;animation-delay:0s;}
+	.chargement2{     animation: nomAnim 0.7s infinite linear;animation-delay:0.1s;}
+	.chargement3{     animation: nomAnim 0.7s infinite linear;animation-delay:0.2s;}
+	
+	</style>
+	
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<h1>Dashboard</h1>
+			
+			<i class="fa fa-home"></i> home &nbsp; <i class="fa fa-chevron-right"></i> &nbsp; tweets
+			
+			
+			
+			
+			
+		</div>
+		
+		
+		<br/>
+		
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="jumbotron" style="margin-top:10px;height: 300px;padding-top: 10px;">
+					
+					<!-- Start stats -->
+					<div id="stats">
+						<h1> Stats for #<span id="hashtagContainer">Example</span></h1>
+						<table>
+							
+							<tr>
+								<td>
+									<b>Buffer size : </b>
+								</td>
+								<td id="bufferSizeStats">
+									&nbsp;&nbsp;10
+								</td>
+							</tr>
+							
+						</table>
+						<br/><br/>
+						
+						<button id="btn-parameters" class="btn btn-default" style="float:right;"><i class="fa fa-cog"></i>&nbsp;Configure</button>
+					</div>
+					<!-- End stats -->
+					
+					
+					<!-- Start parameters -->
+					<div id="parameters" style="display:none;">
+						<h1>Parameters</h1>
+						
+						<label for="hashtaginput"><i class="fa fa-hashtag"></i>&nbsp;Hashtag : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="hashtaginput"/></label><br/>
+						<label for="buffersize"><i class="fa fa-cubes"></i>&nbsp;Buffer size : <input type="number" min="1" max="20" value="10" id="buffersize"/></label>
+						
+						<br/><br/>
+						<br/><br/>
+						
+						<button id="btn-request" class="btn btn-default" style="float:right;"><i class="fa fa-cloud"></i>&nbsp;request</button>
+					</div>
+					<!-- End parameters -->
+					
+					
+					<!-- Start loading -->
+					<div id="loading" style="display:none;text-align:center;">
+						
+						<div class="chargement" style="height:40px;padding : 5px;margin-top:100px;">
+							<div class="chargement1"></div>
+							<div class="chargement2"></div>
+							<div class="chargement3"></div>
+						</div>
+					</div>
+					<!-- End loading -->
+					
+				</div>
+			</div>
+			
+			<div class="col-lg-6">
+				<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+			</div>
+			
+		</div>
+		
+		<br/><br/>
+		
+		<div class="row">
+			
+			<div class="col-lg-6">
+				
+				<table class="table table-striped" id="myTable">
+					<thead>
+						<tr>
+							<th>#</th><th>Word</th><th>score</th>
+						</tr>
+					</thead>
+					<tbody id="myTableBody">
+						<tr><td>1</td><td>example</td><td>2.5</td></tr>
+						<tr><td>2</td><td>example</td><td>2.0</td></tr>
+						<tr><td>3</td><td>example</td><td>2.0</td></tr>
+						<tr><td>4</td><td>example</td><td>1.7</td></tr>
+						<tr><td>5</td><td>example</td><td>0.9</td></tr>
+						<tr><td>6</td><td>example</td><td>0.5</td></tr>
+					</tbody>
+				</table>
+				
+			</div>
+			
+			<div class="col-lg-6">
+				<div id="lineChartContainer" style="height: 300px; width: 100%;">
+					
+				</div>
+			</div>
+			
+			<br/>
+			
+		</div>
+		
+		
+		<br/>
+		
+		
+		
+		
+		
+		<!-- ALL SCRIPTS -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+		<script src="Chartjs/Chart.js"></script>
+		<script type="text/javascript" src="importJS/canvasjs.min.js"></script>
+		<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+		<script>
+			
+		window.onload = function () {
+			function setTable(words){
+				var raw = ""
+				
+				for (var i = 0; i < words.length; i++) {
+					raw += "<tr><td>"+ i  + "</td><td>" + words[i].word + "</td><td>" + words[i].score + "</td></tr>";
+				}
+			
+				$("#myTableBody").html(raw);
+			}
+			
+			var chart = new CanvasJS.Chart("chartContainer",
+			{
+				title:{
+					text: "Sentiment division",
+					fontFamily: "Arial"
+				},
+				exportFileName: "Pie Chart",
+				exportEnabled: true,
+				animationEnabled: true,
+				legend:{
+					verticalAlign: "bottom",
+					horizontalAlign: "center"
+				},
+				data: [
+				{
+					type: "pie",
+					showInLegend: true,
+					toolTipContent: "{legendText}: <strong>{y}%</strong>",
+					indexLabel: "{label} {y}%",
+					dataPoints: [
+						{  y: 33, legendText: "Positive reaction", label: "Positive reaction"},
+						{  y: 33, legendText: "Neutral reaction", label: "Neutral reaction" },
+						{  y: 34, legendText: "Negative reaction", label: "Negative reaction"}
+					]
+			}
+			]
+		});
+			chart.render();
+
+
+			var dpsLine = [
+				{
+					type: "column",
+					showInLegend: true,
+					legendMarkerColor: "grey",
+					legendText: "score per word",
+					dataPoints: [
+					{y: 2.5, label: "example"},
+					{y: 2.0,  label: "example" },
+					{y: 2.0,  label: "example"},
+					{y: 1.7,  label: "example"},
+					{y: 0.9,  label: "example"},
+					{y: 0.5, label: "example"}
+					]
+				}
+			];
+		
+		
+			var lineChart = new CanvasJS.Chart("lineChartContainer",
+			{
+			title:{
+				text: "Scores"
+			},
+			animationEnabled: true,
+			axisY: {
+				title: "tf-idf"
+			},
+			legend: {
+				verticalAlign: "bottom",
+				horizontalAlign: "center"
+			},
+			theme: "theme2",
+			data: dpsLine
+			});
+		
+			lineChart.render();
+		
+		
+		
+		
+		
+		
+		
+			// Table script
+		
+		// $('#myTable').DataTable({
+								// 	"paging":   false,
+		//     "ordering": false,
+		//     "info":     false
+		// });
+		
+		
+			// Some animation
+		
+		
+			$("#btn-parameters").click(function(){
+				$("#stats").fadeOut(300);
+				$("#parameters").delay( 400 ).fadeIn(300);
+			});
+		
+		
+		
+			// Handlerls
+			var twitterJson;
+		
+			$("#btn-request").click(function(){
+		
+		
+				$("#parameters").hide();
+				$("#loading").show();
+		
+				// Ajax request
+				var twitterFeed;
+			
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (xhttp.readyState == 4 && xhttp.status == 200) {
+						twitterFeed = xhttp.responseText;
+						
+						twitterFeed = JSON.parse(twitterFeed);
+						
+						setTable(twitterFeed.words);
+
+						lineChart.options.data[0].dataPoints = [];
+
+						for (var i = 0; i < twitterFeed.words.length; i++) {
+							lineChart.options.data[0].dataPoints.push({y: parseInt(twitterFeed.words[i].score), label: twitterFeed.words[i].word});
+						}
+
+						lineChart.render();
+
+						console.log(chart.options.data[0].dataPoints);
+
+						chart.options.data[0].dataPoints = [];
+
+						for (var i = 0; i < twitterFeed.tones.length; i++) {
+							chart.options.data[0].dataPoints.push({y: parseInt(parseFloat(twitterFeed.tones[i].score)*100), label: twitterFeed.tones[i].tone, legendText: twitterFeed.tones[i].tone});
+						}
+
+						console.log(chart.options.data[0].dataPoints);
+
+						chart.render();
+
+						$("#stats").show();
+						$("#loading").hide();
+						
+					}
+				};
+				xhttp.open("GET", "twitterfeed.php?size=" + $("#buffersize").val() + "&search=" + $("#hashtaginput").val(), true);
+		
+		
+				$("#bufferSizeStats").html($("#buffersize").val());
+				$("#hashtagContainer").html($("#hashtaginput").val());
+		
+				xhttp.send();
+
+			});
+		
+		}
+		</script>
+	</body>
+</html>

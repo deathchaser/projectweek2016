@@ -1,7 +1,5 @@
 <?php
 
-require_once("tfidf.php");
-
 $requestUrl = 'https://ba4f9524-07de-4ac5-82e3-58af008724e2:0gssliiq3f@cdeservice.mybluemix.net/api/v1/messages/search';
 $search = "ucll";
 $size = 20;
@@ -106,7 +104,7 @@ for($i = 0;$i < count($lines); $i++) {
 
 foreach($twitterContentWords as $w => $a) {
 	$usedCount = countUses($w, $defaultLines);
-	if(isInFilter($w, $filter) || strlen($w) <= 3) {
+	if(isInFilter($w, $filter) || strlen($w) <= 3 || $w == $search) {
 		$twitterContentWords[$w] = 0;
 	}else{
 		$twitterContentWords[$w] = $a / countUses($w, $defaultLines);
@@ -134,7 +132,7 @@ $resultJson .= ']';
 
 $watsonDataString = useWatson($twitterContent);
 if($watsonDataString == false) {
-	
+
 }else{
 	$watsonData = json_decode($watsonDataString);
 
