@@ -8,7 +8,7 @@ $from = 0;
 
 
 if(isset($_GET['search']))
-	$search = $_GET['search'];
+	$search = strtolower($_GET['search']);
 
 if(isset($_GET['size']))
 	$size = $_GET['size'];
@@ -39,7 +39,8 @@ print_r($twitterContentWords);
 echo "Blu";*/
 
 $defaultLines = array();
-$filter = array("http", "whores", "followers", "pussy", "retweet", "t", "did", "am", "already", "i", "you", "he", "we", "them", "the","of","to","and","a","in","for","is","The","that","on","said","with","be","was","by","as","are","at","from","it","has","an","have","will","or","its","he","not","were","which","this","but","can","more","his","been","would","about","their","also","they","had","than","up","who","In","one","you","new","A","I","other","all","two","S","But","It","into","U","Mr.", "please","some","when","out","last","only","after","first","time","says","He", "no","over","we","could","if","such","This","most","use","because","any","there","them","may","so","New","now","many", "good","new", "long","great","little","own","other","old","right","big","high","different","small","large","next","early","few","same","be","have","do", "so", "how","then","here","well","only","very","even","back","there","down","still","in","as","too","when","never","really","most","of","in","to","for","with","on","at","from","by","about","as","into","like","through","after","over","out","one","her","us","something","nothing","anything","himself","everything","someone","themselves","everyone","itself","anyone","myself","and","that","but","or","as","if","when","than","because","while","where","after","so","though","since","until","whether","before","although","nor","like","once","unless","now","except","one","two","first","last","three","next","million","four","five","second","six","third","billion","hundred","thousand","seven","eight","ten","nine","dozen","fourth","twenty","fifth","thirty","yes","oh","yeah","no","hey","hi","hello","hmm","ah","wow","the","be","to","of","and","a","in","that","have","I","it","for","not","on","with","he","as","you","do","at","this","but","his","by","from","they","we","say","her","she","or","an","will","my","one","all","would","there","their","what","so","up","out","if","about","who","get","which","go","me","when","make","can","like","time","no","just","him","know","take","person","into","year","your","good","some","could","them","see","other","than","then","now","look","only","come","its","over","think","also","back","after","use","two","how","our","work","first","well","way","even","new","want","because","any","these","give","day","most","us");
+$filter = array("http", "https", "whores", "followers", "pussy", "retweet", "t", "did", "am", "already", "i", "you", "he", "we", "them", "the","of","to","and","a","in","for","is","The","that","on","said","with","be","was","by","as","are","at","from","it","has","an","have","will","or","its","he","not","were","which","this","but","can","more","his","been","would","about","their","also","they","had","than","up","who","In","one","you","new","A","I","other","all","two","S","But","It","into","U","Mr.", "please","some","when","out","last","only","after","first","time","says","He", "no","over","we","could","if","such","This","most","use","because","any","there","them","may","so","New","now","many", "good","new", "long","great","little","own","other","old","right","big","high","different","small","large","next","early","few","same","be","have","do", "so", "how","then","here","well","only","very","even","back","there","down","still","in","as","too","when","never","really","most","of","in","to","for","with","on","at","from","by","about","as","into","like","through","after","over","out","one","her","us","something","nothing","anything","himself","everything","someone","themselves","everyone","itself","anyone","myself","and","that","but","or","as","if","when","than","because","while","where","after","so","though","since","until","whether","before","although","nor","like","once","unless","now","except","one","two","first","last","three","next","million","four","five","second","six","third","billion","hundred","thousand","seven","eight","ten","nine","dozen","fourth","twenty","fifth","thirty","yes","oh","yeah","no","hey","hi","hello","hmm","ah","wow","the","be","to","of","and","a","in","that","have","I","it","for","not","on","with","he","as","you","do","at","this","but","his","by","from","they","we","say","her","she","or","an","will","my","one","all","would","there","their","what","so","up","out","if","about","who","get","which","go","me","when","make","can","like","time","no","just","him","know","take","person","into","year","your","good","some","could","them","see","other","than","then","now","look","only","come","its","over","think","also","back","after","use","two","how","our","work","first","well","way","even","new","want","because","any","these","give","day","most","us");
+$special = array(",", "'", "!", ".", "@", ";", "/", "(", ")", "\"");
 
 function countStr($str) {
 	$words = array_count_values(str_word_count($str, 1));
@@ -48,6 +49,15 @@ function countStr($str) {
 
 function isInFilter($word, $filter) {
 	return in_array($word, $filter);
+}
+
+function hasSpecial($word, $special) {
+	foreach($special as $spec) {
+		if(strpos($word, $spec) != false) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function countUses($word, $defaultLines) {
@@ -104,7 +114,7 @@ for($i = 0;$i < count($lines); $i++) {
 
 foreach($twitterContentWords as $w => $a) {
 	$usedCount = countUses($w, $defaultLines);
-	if(isInFilter($w, $filter) || strlen($w) <= 3 || $w == $search) {
+	if(isInFilter($w, $filter) || strlen($w) <= 3 || $w == $search || hasSpecial($w, $special)) {
 		$twitterContentWords[$w] = 0;
 	}else{
 		$twitterContentWords[$w] = $a / countUses($w, $defaultLines);

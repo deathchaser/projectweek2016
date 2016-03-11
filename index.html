@@ -49,7 +49,7 @@
 				<div class="jumbotron" style="margin-top:10px;height: 300px;padding-top: 10px;">
 					
 					<!-- Start stats -->
-					<div id="stats">
+					<div id="stats" style="display:none;">
 						<h1> Stats for #<span id="hashtagContainer">Example</span></h1>
 						<table>
 							
@@ -71,16 +71,16 @@
 					
 					
 					<!-- Start parameters -->
-					<div id="parameters" style="display:none;">
+					<div id="parameters" style="">
 						<h1>Parameters</h1>
 						
-						<label for="hashtaginput"><i class="fa fa-hashtag"></i>&nbsp;Hashtag : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id="hashtaginput"/></label><br/>
-						<label for="buffersize"><i class="fa fa-cubes"></i>&nbsp;Buffer size : <input type="number" min="1" max="20" value="10" id="buffersize"/></label>
+						<label for="hashtaginput"><i class="fa fa-hashtag"></i>&nbsp;Hashtag : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input style="margin-bottom: 10px;" type="text" id="hashtaginput"/></label><br/>
+						<label for="buffersize"><i class="fa fa-cubes"></i>&nbsp;Buffer size : <input style="margin-bottom: 10px;" type="number" min="1" max="20" value="10" id="buffersize"/></label><br/>
+						<label for="languagae"><i class="fa fa-globe"></i>&nbsp;Language: &nbsp;&nbsp;&nbsp;<select id="language" style="padding: 3px; font-size: 13px;margin-bottom: 10px;" name="language"><option value="en">English</option><option value="none">None</option></select></label>
 						
-						<br/><br/>
-						<br/><br/>
+						<br/>
 						
-						<button id="btn-request" class="btn btn-default" style="float:right;"><i class="fa fa-cloud"></i>&nbsp;request</button>
+						<button id="btn-request" class="btn btn-default" style="float:right;margin-top:6px;margin-right: 3px;"><i class="fa fa-cloud"></i>&nbsp;request</button>
 					</div>
 					<!-- End parameters -->
 					
@@ -118,12 +118,16 @@
 						</tr>
 					</thead>
 					<tbody id="myTableBody">
-						<tr><td>1</td><td>example</td><td>2.5</td></tr>
-						<tr><td>2</td><td>example</td><td>2.0</td></tr>
-						<tr><td>3</td><td>example</td><td>2.0</td></tr>
-						<tr><td>4</td><td>example</td><td>1.7</td></tr>
-						<tr><td>5</td><td>example</td><td>0.9</td></tr>
-						<tr><td>6</td><td>example</td><td>0.5</td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
+							<tr style="height: 30px;"><td> </td><td> </td><td> </td></tr>
 					</tbody>
 				</table>
 				
@@ -232,8 +236,7 @@
 			lineChart.render();
 		
 		
-		
-		
+			
 		
 		
 		
@@ -258,8 +261,33 @@
 		
 			// Handlerls
 			var twitterJson;
-		
+			
+			$("#buffersize").keypress(function(e) {
+				if(e.which == 13) {
+					handleRequest();
+				}
+			});
+			
+			$("#hashtaginput").keypress(function(e) {
+				if(e.which == 13) {
+					handleRequest();
+				}
+			});
+			
 			$("#btn-request").click(function(){
+				handleRequest();
+			});
+			
+			function handleRequest() {
+				var hashtaginput = $("#hashtaginput").val();
+			
+				hashtaginput = hashtaginput.replace("#", "");
+				
+				if(hashtaginput.length <= 0) {
+					alert("Please Fill In A Hashtag");
+					return false;
+				}
+				
 		
 		
 				$("#parameters").hide();
@@ -282,9 +310,9 @@
 						for (var i = 0; i < twitterFeed.words.length; i++) {
 							lineChart.options.data[0].dataPoints.push({y: parseInt(twitterFeed.words[i].score), label: twitterFeed.words[i].word});
 						}
-
+						
+						
 						lineChart.render();
-
 						console.log(chart.options.data[0].dataPoints);
 
 						chart.options.data[0].dataPoints = [];
@@ -302,15 +330,16 @@
 						
 					}
 				};
-				xhttp.open("GET", "twitterfeed.php?size=" + $("#buffersize").val() + "&search=" + $("#hashtaginput").val(), true);
+				xhttp.open("GET", "twitterfeed.php?size=" + $("#buffersize").val() + "&search=" + hashtaginput + "&lang=" + $("#language").val(), true);
 		
 		
 				$("#bufferSizeStats").html($("#buffersize").val());
-				$("#hashtagContainer").html($("#hashtaginput").val());
+				$("#hashtagContainer").html(hashtaginput);
+				
 		
 				xhttp.send();
 
-			});
+			}
 		
 		}
 		</script>
